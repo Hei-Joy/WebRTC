@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>主播开播页面</title>
+  </head>
+  <body>
+    <video src="" id="vi" autoplay style="width: 640px; height:480px;"></video>
+    <canvas id="output" style="display: none"></canvas>
+  <script type="text/javascript">
+    var back = document.getElementById("output");
+    var backContext = document.getElementById("output").getContext("2d");
+    var video = document.getElementById("vi");
+    var socket;
+    var interval;
+    setTimeout("init()", 100)
+    function init() {
+      //建立服务
+      socket = new WebSocket("ws://121.41.224.219:8080/onlineServer")
+      socket.onopen = onOpen;
+      socket.onclose = onClose;
+    }
+
+    function onOpen() {
+      //定时传输数据到服务器
+      clearInterval(interval)
+      interval = setInterval(function () {
+        draw()
+      }, 50);
+    }
+
+    function onClose() {
+      init()
+    }
+
+    function draw() {
+      backContext.drawImage(video, 0, 0, back.width, back.height);
+      //将视频失帧50%
+      socket.send(back.toDataURL("image/jpeg", 0.5));
+
+    }
+
+    var success = function(stream) {
+      video.srcObject = stream;
+    }
+
+    //js bom模型
+    navigator.getUserMedia == navigator.getUserMedia || navigator.webkitGetUserMedia
+    || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    navigator.getUserMedia({video:true, audio:true}, success, console.log);
+
+
+  </script>
+  </body>
+</html>
